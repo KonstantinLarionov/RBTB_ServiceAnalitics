@@ -1,4 +1,5 @@
 ﻿using RBTB_ServiceAnalitics.Database;
+using RBTB_ServiceAnalitics.Integration;
 
 namespace RBTB_ServiceAnalitics.Background
 {
@@ -6,11 +7,13 @@ namespace RBTB_ServiceAnalitics.Background
 	{
 		private readonly AnaliticContext _context;
 		private Timer _timer;
+		private TelegramClient _tg;
 
 		public Cleaner(AnaliticContext context)
 		{
 			_context = context;
 			_context.Database.EnsureCreated();
+			_tg = new TelegramClient();
 		}
 		protected override Task ExecuteAsync( CancellationToken stoppingToken )
 		{
@@ -19,14 +22,22 @@ namespace RBTB_ServiceAnalitics.Background
 			return Task.CompletedTask;
 		}
 		public void Cleaning(object obj)
-		{ 
-			var dateFilter = DateTime.Now.AddDays(-1);
-			var ticks = _context.Ticks
-				.Where(x => x.DateTime < dateFilter)
-				.ToList();
+		{
+			try
+			{
+				var dateFilter = DateTime.Now.AddDays( -1 );
+				var ticks = _context.Ticks
+					.Where( x => x.DateTime < dateFilter )
+					.ToList();
 
-			_context.Ticks.RemoveRange(ticks);
-			_context.SaveChanges();
+				_context.Ticks.RemoveRange( ticks );
+				_context.SaveChanges();
+			}
+			catch ( Exception ex ) 
+			{
+				_tg.SendMessage("[ServiceAnalitic] - Упал в клининге");
+				_tg.SendMessage("[Cleaning] - " + ex.StackTrace);
+			}
 		}
 	}
 }

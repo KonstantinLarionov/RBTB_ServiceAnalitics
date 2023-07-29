@@ -1,4 +1,5 @@
 ﻿using RBTB_ServiceAnalitics.Database;
+using RBTB_ServiceAnalitics.Integration;
 using RBTB_ServiceAnalitics.Markets.Binance;
 
 namespace RBTB_ServiceAnalitics.Background
@@ -7,6 +8,7 @@ namespace RBTB_ServiceAnalitics.Background
 	{
 		private readonly AnaliticContext _context;
 		private readonly BinanceWebSocket _binanceSocket;
+		private TelegramClient _tg;
 
 		public TickCollector(AnaliticContext context)
 		{
@@ -15,6 +17,8 @@ namespace RBTB_ServiceAnalitics.Background
 			_binanceSocket = new BinanceWebSocket();
 			_binanceSocket.Symbol = "BTCUSDT";
 			_binanceSocket.TradeEv += _binanceSocket_TradeEv;
+			_tg = new TelegramClient();
+
 		}
 
 		protected override Task ExecuteAsync( CancellationToken stoppingToken )
@@ -25,15 +29,23 @@ namespace RBTB_ServiceAnalitics.Background
 
 		private void _binanceSocket_TradeEv( BinanceMapper.Spot.MarketWS.Events.TradeEvent tradesEvent )
 		{
-			_context.Ticks.Add( new Database.Entities.Tick()
+			try
 			{
-				Price = tradesEvent.Price,
-				Volume = tradesEvent.Quantity,
-				Milliseconds = tradesEvent.TradeTime,
-				DateTime = DateTime.Now,
-				Symbol = tradesEvent.Symbol
-			} ) ;
-			_context.SaveChanges();
+				_context.Ticks.Add( new Database.Entities.Tick()
+				{
+					Price = tradesEvent.Price,
+					Volume = tradesEvent.Quantity,
+					Milliseconds = tradesEvent.TradeTime,
+					DateTime = DateTime.Now,
+					Symbol = tradesEvent.Symbol
+				} );
+				_context.SaveChanges();
+			}
+			catch ( Exception ex )
+			{
+				_tg.SendMessage( "[ServiceAnalitic] - Упал в тикере" );
+				_tg.SendMessage( "[Тикер] - " + ex.StackTrace );
+			}
 		}
 	}
 }
