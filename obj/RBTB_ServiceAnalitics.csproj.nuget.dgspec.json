@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\RBTB_WindowsClient_Frame\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj": {}
+    "C:\\Users\\Valan\\Desktop\\new RBTB\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj": {}
   },
   "projects": {
-    "D:\\RBTB_WindowsClient_Frame\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj": {
+    "C:\\Users\\Valan\\Desktop\\new RBTB\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\RBTB_WindowsClient_Frame\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj",
+        "projectUniqueName": "C:\\Users\\Valan\\Desktop\\new RBTB\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj",
         "projectName": "RBTB_ServiceAnalitics",
-        "projectPath": "D:\\RBTB_WindowsClient_Frame\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj",
-        "packagesPath": "C:\\Users\\kosty\\.nuget\\packages\\",
-        "outputPath": "D:\\RBTB_WindowsClient_Frame\\RBTB_ServiceAnalitics\\obj\\",
+        "projectPath": "C:\\Users\\Valan\\Desktop\\new RBTB\\RBTB_ServiceAnalitics\\RBTB_ServiceAnalitics.csproj",
+        "packagesPath": "C:\\Users\\Valan\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Valan\\Desktop\\new RBTB\\RBTB_ServiceAnalitics\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\kosty\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Valan\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -63,7 +63,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -75,7 +76,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.120\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }
