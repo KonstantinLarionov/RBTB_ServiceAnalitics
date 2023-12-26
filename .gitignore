@@ -8,7 +8,7 @@ websocket.log
 # appsettings.json
 
 .idea/
-
+.vs/
 
 # User-specific files
 *.rsuser
@@ -377,3 +377,4 @@ FodyWeavers.xsd
 /RBTB_ServiceAnalitics/appsettings.json
 /RBTB_ServiceAnalitics/appsettings.Development.json
 /RBTB_ServiceAnalitics/appsettings.json
+/.vs/ProjectEvaluation/rbtb_serviceanalitics.metadata.v7.bin

@@ -52,6 +52,5 @@ namespace RBTB_ServiceAnalitics.Background
                 _tg.SendMessage("[Cleaning] - " + ex.Message);
             }
         }
-
     }
 }
