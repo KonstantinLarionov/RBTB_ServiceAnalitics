@@ -14,6 +14,7 @@ namespace RBTB_ServiceAnalitics.Background
         private TelegramClient _tg;
         private readonly ServiceAnaliticsOption _option;
         private readonly string _symbol = "BTCUSDT";
+        private Timer _pingSender;
         public TickCollector(AnaliticContext context, TelegramClient telegramClient, IOptions<ServiceAnaliticsOption> options)
         {
             _context = context;
@@ -23,21 +24,22 @@ namespace RBTB_ServiceAnalitics.Background
 
             _bybitWebSocket = new BybitWebSocket(_option.WsUrl);
             _bybitWebSocket.Symbol = _option.Symbol;
-            _bybitWebSocket.TradeEvent += _binanceSocket_TradeEv;
-            _symbol = _option.Symbol;
+            _bybitWebSocket.TradeEvent += _bybitSocket_TradeEvent;
+            _bybitWebSocket.ErrorEvent += _bybitSocket_ErrorEvent;
 
             _tg = telegramClient;
-
+            _pingSender = new Timer((_) => _bybitWebSocket.Ping(), null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _bybitWebSocket.Start();
             _bybitWebSocket.PublicSubscribe(_symbol, BybitMapper.UTA.MarketStreamsV5.Data.Enums.PublicEndpointType.Trade, BybitMapper.UTA.RestV5.Data.Enums.IntervalType.TwoHour);
+
             return Task.CompletedTask;
         }
 
-        private void _binanceSocket_TradeEv(TradeEvent tradesEvent)
+        private void _bybitSocket_TradeEvent(TradeEvent tradesEvent)
         {
             try
             {
@@ -60,6 +62,15 @@ namespace RBTB_ServiceAnalitics.Background
                 _tg.SendMessage("[ServiceAnalitic] - Упал в тикере");
                 _tg.SendMessage("[Тикер] - " + ex.StackTrace);
             }
+        }
+
+        private void _bybitSocket_ErrorEvent(object sender, Exception exception)
+        {
+            _tg.SendMessage($"[bybitWebSocket] - Упал в сокете ");
+            _tg.SendMessage($"[bybitWebSocket] - Попытка переподключения");
+
+            _bybitWebSocket.Start();
+            _bybitWebSocket.PublicSubscribe(_symbol, BybitMapper.UTA.MarketStreamsV5.Data.Enums.PublicEndpointType.Trade, BybitMapper.UTA.RestV5.Data.Enums.IntervalType.TwoHour);
         }
     }
 }

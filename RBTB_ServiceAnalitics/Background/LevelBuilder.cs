@@ -9,6 +9,8 @@ namespace RBTB_ServiceAnalitics.Background
         private readonly AnaliticContext _context;
         private Timer _timer;
         private TelegramClient _tg;
+        Mutex mutexObj = new();
+        private object locker = new();
         public LevelBuilder(AnaliticContext context, TelegramClient telegramClient)
         {
             _context = context;
@@ -18,12 +20,11 @@ namespace RBTB_ServiceAnalitics.Background
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await RunLeveing();
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-
+                    await RunLeveing();
                 }
                 catch (Exception e)
                 {
@@ -37,7 +38,7 @@ namespace RBTB_ServiceAnalitics.Background
         private async Task RunLeveing()
         {
             TimerCallback tm = new TimerCallback(Leveling);
-            _timer = new Timer(tm, null, 0, 2000);
+            _timer = new Timer(tm, null, 0, 20000);
         }
 
         public void Leveling(object obj)
@@ -58,17 +59,15 @@ namespace RBTB_ServiceAnalitics.Background
                         .ToList();
 
                 _context.Levels.RemoveRange(_context.Levels);
-                _context.SaveChanges();
-
                 _context.Levels.AddRange(levels);
-                _context.SaveChanges();
 
+                _context.SaveChanges();
 
             }
             catch (Exception ex)
             {
                 _tg.SendMessage("[ServiceAnalitic] - Упал в левелинге");
-                _tg.SendMessage("[Leveling] - " + ex.StackTrace);
+                _tg.SendMessage($"[Leveling] - {ex.Message}");
             }
         }
     }

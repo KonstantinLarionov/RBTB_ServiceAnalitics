@@ -22,7 +22,5 @@ public class TelegramClient
     }
     public void SendMessage(string mess) =>
         HttpClient
-            .GetAsync($"https://api.telegram.org/bot{_token}/sendMessage?chat_id={_chat}&text={mess}")
-            .GetAwaiter()
-            .GetResult();
+            .GetAsync($"https://api.telegram.org/bot{_token}/sendMessage?chat_id={_chat}&text={mess}");
 }

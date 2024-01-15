@@ -7,7 +7,8 @@ using System.Text.Json.Serialization;
 using WebSocketSharp;
 using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 using BybitMapper.UTA.MarketStreamsV5.Data.Enums;
-using BybitMapper.UTA.RestV5.Data.Enums;    
+using BybitMapper.UTA.RestV5.Data.Enums;
+using System.Text;
 
 namespace RBTB_ServiceAnalitics.Markets.Bybit;
 public class BybitWebSocket
@@ -110,6 +111,11 @@ public class BybitWebSocket
                 ExecEvent?.Equals(useEvent);
             }
         }
+    }
+
+    public void Ping()
+    {
+        _socket.Send( Encoding.UTF8.GetBytes("ping"));
     }
 
     public void PublicSubscribe(string symbol, PublicEndpointType endpointType,
