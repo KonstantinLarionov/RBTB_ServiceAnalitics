@@ -1,4 +1,5 @@
-﻿using RBTB_ServiceAnalitics.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using RBTB_ServiceAnalitics.Database;
 using RBTB_ServiceAnalitics.Database.Entities;
 using RBTB_ServiceAnalitics.Integration;
 
@@ -10,21 +11,25 @@ namespace RBTB_ServiceAnalitics.Background
         private Timer _timer;
         private TelegramClient _tg;
         Mutex mutexObj = new();
-        private object locker = new();
-        public LevelBuilder(AnaliticContext context, TelegramClient telegramClient)
+        private Object locker = new();
+
+        private readonly string _connectionString;
+        public LevelBuilder(AnaliticContext context, TelegramClient telegramClient, IConfiguration configuration)
         {
             _context = context;
             _context.Database.EnsureCreated();
             _tg = telegramClient;
+            _connectionString = configuration.GetValue<string>("ConnectionStrings:DBConnection")!;
 
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await RunLeveing();
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    await RunLeveing();
+
                 }
                 catch (Exception e)
                 {
@@ -38,36 +43,52 @@ namespace RBTB_ServiceAnalitics.Background
         private async Task RunLeveing()
         {
             TimerCallback tm = new TimerCallback(Leveling);
-            _timer = new Timer(tm, null, 0, 20000);
+            _timer = new Timer(tm, null, 0, 20);
         }
 
         public void Leveling(object obj)
         {
-            try
+            if (Monitor.TryEnter(locker))
             {
-                var levels = _context.Ticks
-                        .GroupBy(t => t.Price)
-                        .Select(x =>
-                         new Level()
-                         {
-                             Price = x.Key,
-                             Symbol = "BTCUSDT",
-                             DateCreate = DateTime.Now,
-                             Volume =
-                         x.Sum(v => v.Volume)
-                         })
-                        .ToList();
+                try
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<AnaliticContext>();
 
-                _context.Levels.RemoveRange(_context.Levels);
-                _context.Levels.AddRange(levels);
+                    var options = optionsBuilder.UseNpgsql(_connectionString).Options;
 
-                _context.SaveChanges();
+                    using (AnaliticContext context = new AnaliticContext(options))
+                    {
+                        try
+                        {
+                            var levels = context.Ticks
+                                    .GroupBy(t => t.Price)
+                                    .Select(x =>
+                                     new Level()
+                                     {
+                                         Price = x.Key,
+                                         Symbol = "BTCUSDT",
+                                         DateCreate = DateTime.Now,
+                                         Volume =
+                                     x.Sum(v => v.Volume)
+                                     })
+                                    .ToList();
 
-            }
-            catch (Exception ex)
-            {
-                _tg.SendMessage("[ServiceAnalitic] - Упал в левелинге");
-                _tg.SendMessage($"[Leveling] - {ex.Message}");
+                            context.Levels.RemoveRange(context.Levels);
+                            context.Levels.AddRange(levels);
+
+                            context.SaveChanges();
+                        }
+                        catch (Exception ex)
+                        {
+                            _tg.SendMessage("[ServiceAnalitic] - Упал в левелинге");
+                            _tg.SendMessage($"[Leveling] - {ex.Message}");
+                        }
+                    }
+                }
+                finally
+                {
+                    Monitor.Exit(locker);
+                }
             }
         }
     }

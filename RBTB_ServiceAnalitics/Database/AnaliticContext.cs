@@ -15,5 +15,5 @@ namespace RBTB_ServiceAnalitics.Database
 		protected override void OnConfiguring( DbContextOptionsBuilder optionsBuilder )
 		{
 		}
-	}
+    }
 }

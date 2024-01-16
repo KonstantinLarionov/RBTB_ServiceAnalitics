@@ -1,4 +1,6 @@
-﻿using RBTB_ServiceAnalitics.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using RBTB_ServiceAnalitics.Database;
 using RBTB_ServiceAnalitics.Integration;
 
 namespace RBTB_ServiceAnalitics.Background
@@ -9,16 +11,18 @@ namespace RBTB_ServiceAnalitics.Background
         private Timer _timer;
         private TelegramClient _tg;
         private object locker = new();
-        public Cleaner(AnaliticContext context, TelegramClient telegramClient)
+        private readonly string _connectionString;
+        public Cleaner(AnaliticContext context, TelegramClient telegramClient, IConfiguration configuration)
         {
             _context = context;
             _context.Database.EnsureCreated();
             _tg = telegramClient;
+            _connectionString = configuration.GetValue<string>("ConnectionStrings:DBConnection")!;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             TimerCallback tm = new TimerCallback(Cleaning);
-            _timer = new Timer(tm, null, 0, 20000);
+            _timer = new Timer(tm, null, 0, 20);
             if (stoppingToken.IsCancellationRequested)
             {
                 try
@@ -34,21 +38,36 @@ namespace RBTB_ServiceAnalitics.Background
         }
         public void Cleaning(object obj)
         {
-            try
+            if (Monitor.TryEnter(locker))
             {
-                var dateFilter = DateTime.Now.AddDays(-1);
-                var ticks = _context.Ticks
-                    .Where(x => x.DateTime < dateFilter)
-                .ToList();
+                try
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<AnaliticContext>();
+                    var options = optionsBuilder.UseNpgsql(_connectionString).Options;
 
-                _context.Ticks.RemoveRange(ticks);
-                _context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                _tg.SendMessage("[ServiceAnalitic] - Упал в клининге");
-                _tg.SendMessage("[Cleaning] - " + ex.StackTrace);
-                _tg.SendMessage("[Cleaning] - " + ex.Message);
+                    using (AnaliticContext context = new AnaliticContext(options))
+                    {
+                        try
+                        {
+                            var dateFilter = DateTime.Now.AddDays(-1);
+                            var ticks = context.Ticks
+                                .Where(x => x.DateTime < dateFilter)
+                            .ToList();
+                            context.Ticks.RemoveRange(ticks);
+                            context.SaveChanges();
+                        }
+                        catch (Exception ex)
+                        {
+                            _tg.SendMessage("[ServiceAnalitic] - Упал в клининге");
+                            _tg.SendMessage("[Cleaning] - " + ex.StackTrace);
+                            _tg.SendMessage("[Cleaning] - " + ex.Message);
+                        }
+                    }
+                }
+                finally
+                {
+                    Monitor.Exit(locker);
+                }
             }
         }
     }
