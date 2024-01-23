@@ -8,7 +8,7 @@ namespace RBTB_ServiceAnalitics.Background
     public class LevelBuilder : BackgroundService
     {
         private readonly AnaliticContext _context;
-        private Timer _timer;
+        private Timer? _timer;
         private TelegramClient _tg;
         Mutex mutexObj = new();
         private Object locker = new();
@@ -24,14 +24,14 @@ namespace RBTB_ServiceAnalitics.Background
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await RunLeveing();
+            RunLeveing();
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
 
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // log exception
                 }
@@ -40,9 +40,9 @@ namespace RBTB_ServiceAnalitics.Background
             await Task.CompletedTask;
         }
 
-        private async Task RunLeveing()
+        private void RunLeveing()
         {
-            TimerCallback tm = new TimerCallback(Leveling);
+            TimerCallback tm = new TimerCallback(Leveling!);
             _timer = new Timer(tm, null, 0, 20);
         }
 

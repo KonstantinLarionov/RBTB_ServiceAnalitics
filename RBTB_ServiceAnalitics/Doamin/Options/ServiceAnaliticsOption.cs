@@ -5,5 +5,6 @@
         public string WsUrl { get; set; } = null!;
         public string Url { get; set; } = null!;
         public string Symbol { get; set; } = null!;
+        public int CounterReconnectWS { get; set; }
     }
 }

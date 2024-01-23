@@ -8,7 +8,7 @@ namespace RBTB_ServiceAnalitics.Background
     public class Cleaner : BackgroundService
     {
         private readonly AnaliticContext _context;
-        private Timer _timer;
+        private Timer? _timer;
         private TelegramClient _tg;
         private object locker = new();
         private readonly string _connectionString;
@@ -21,13 +21,12 @@ namespace RBTB_ServiceAnalitics.Background
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            TimerCallback tm = new TimerCallback(Cleaning);
+            TimerCallback tm = new TimerCallback(Cleaning!);
             _timer = new Timer(tm, null, 0, 20);
             if (stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-
                 }
                 catch
                 {
