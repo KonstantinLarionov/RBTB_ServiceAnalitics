@@ -5,7 +5,7 @@ using RBTB_ServiceAnalitics.Doamin.Options;
 using RBTB_ServiceAnalitics.Integration;
 
 var builder = WebApplication
-	.CreateBuilder( args );
+    .CreateBuilder(args);
 
 // Add services to the container.
 
@@ -35,17 +35,23 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContextFactory<AnaliticContext>(
-	options => { options.LogTo(Console.WriteLine, LogLevel.Error); options.UseNpgsql( builder.Configuration.GetConnectionString( "DbConnection" ) ); }, ServiceLifetime.Transient ) ;
+    options =>
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Error); options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection")!, build =>
+        {
+            build.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+        });
+    }, ServiceLifetime.Transient);
 
-AppContext.SetSwitch( "Npgsql.EnableLegacyTimestampBehavior", true );
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

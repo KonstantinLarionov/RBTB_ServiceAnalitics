@@ -69,7 +69,11 @@ namespace RBTB_ServiceAnalitics.Background
 
         private void _bybitSocket_ErrorEvent(object sender, Exception exception, int countReconnect = 0, bool reconnect = false)
         {
-            _pingSender = null;
+            if (_pingSender != null)
+            {
+                _pingSender.Dispose();
+            }
+
             _tg.SendMessage($"[bybitWebSocket] - Упал в сокете");
 
             if (reconnect)
@@ -88,6 +92,10 @@ namespace RBTB_ServiceAnalitics.Background
 
         private void _bybitSocket_CloseEvent(object sender, CloseEventArgs baseEvent)
         {
+            if (_pingSender != null)
+            {
+                _pingSender.Dispose();
+            }
         }
     }
 }
