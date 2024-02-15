@@ -39,7 +39,7 @@ builder.Services.AddDbContextFactory<AnaliticContext>(
     {
         options.LogTo(Console.WriteLine, LogLevel.Error); options.UseNpgsql(builder.Configuration.GetConnectionString("DbConnection")!, build =>
         {
-            build.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+            build.EnableRetryOnFailure(10, TimeSpan.FromSeconds(10), null);
         });
     }, ServiceLifetime.Transient);
 

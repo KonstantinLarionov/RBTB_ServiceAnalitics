@@ -9,7 +9,7 @@ using ErrorEventArgs = WebSocketSharp.ErrorEventArgs;
 using BybitMapper.UTA.MarketStreamsV5.Data.Enums;
 using BybitMapper.UTA.RestV5.Data.Enums;
 using System.Text;
-
+            
 namespace RBTB_ServiceAnalitics.Markets.Bybit;
 public class BybitWebSocket
 {
@@ -50,6 +50,7 @@ public class BybitWebSocket
         UserStreams = new UserStreamsHandlerCompositionV5();
 
         _countReconnect = countReconnect;
+        _WSreconnectCounter = _countReconnect;
     }
 
     private static T? Deserialize<T>(byte[] message)
@@ -119,7 +120,7 @@ public class BybitWebSocket
 
     public void Ping()
     {
-        _socket.Send( Encoding.UTF8.GetBytes("ping"));
+        _socket.Ping();
     }
 
     public void PublicSubscribe(string symbol, PublicEndpointType endpointType,

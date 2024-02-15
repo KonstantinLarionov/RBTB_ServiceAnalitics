@@ -92,10 +92,6 @@ namespace RBTB_ServiceAnalitics.Background
 
         private void _bybitSocket_CloseEvent(object sender, CloseEventArgs baseEvent)
         {
-            if (_pingSender != null)
-            {
-                _pingSender.Dispose();
-            }
         }
     }
 }

@@ -29,7 +29,6 @@ namespace RBTB_ServiceAnalitics.Background
             {
                 try
                 {
-
                 }
                 catch (Exception)
                 {

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using RBTB_ServiceAnalitics.Database;
 using RBTB_ServiceAnalitics.Integration;
 

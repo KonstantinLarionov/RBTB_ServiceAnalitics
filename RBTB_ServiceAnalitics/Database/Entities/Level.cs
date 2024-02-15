@@ -4,7 +4,7 @@ namespace RBTB_ServiceAnalitics.Database.Entities
 {
 	public class Level
 	{
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 		public string Symbol { get; set; }
 		public decimal Price { get; set; }
         [ConcurrencyCheck]
